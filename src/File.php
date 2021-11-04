@@ -180,6 +180,34 @@ class File extends QueryableModel implements MediaUrlResolvable
         }
     }
 
+    public function getRelatedEntriesAttribute($related_entries)
+    {
+        return array_map(fn ($entry) => intval($entry), array_values(array_filter(explode(',', $related_entries ?? ''))));
+    }
+
+    public function setRelatedEntriesAttribute($related_entries = [])
+    {
+        if (is_array($related_entries)) {
+            $related_entries = implode(',', $related_entries);
+        }
+
+        $this->attributes['related_entries'] = $related_entries;
+    }
+
+    public function getRelatedCustomersAttribute($related_customers)
+    {
+        return array_map(fn ($customer) => intval($customer), array_values(array_filter(explode(',', $related_customers ?? ''))));
+    }
+
+    public function setRelatedCustomersAttribute($related_customers = [])
+    {
+        if (is_array($related_customers)) {
+            $related_customers = implode(',', $related_customers);
+        }
+
+        $this->attributes['related_customers'] = $related_customers;
+    }
+
     public function setTagsAttribute($tags = [])
     {
         if (is_string($tags)) {
@@ -260,6 +288,29 @@ class File extends QueryableModel implements MediaUrlResolvable
     }
 
     /**
+     * Undocumented function
+     *
+     * @param [type] $newName
+     * @param [type] $newFolder
+     * @return static
+     */
+    public function copy($newName = null, $newFolder = null)
+    {
+        $attributes = [
+            'link' => $this->url(),
+            'filename' => $newName ?? $this->name,
+            'folder_id' => $newFolder ?? $this->folder_id,
+        ];
+
+        $folder = $attributes['folder_id'];
+
+        $response = $this->getConnection()
+            ->post('files/folder/' . $folder, $attributes);
+
+        return static::find($response->id);
+    }
+
+    /**
      * @param UploadedFile|File|string $file
      * @param array $attributes
      * @param int|null $folder
@@ -295,7 +346,7 @@ class File extends QueryableModel implements MediaUrlResolvable
         $baseUrl = 'files/folder/' . $folder;
 
         if (isset($attributes['name'])) {
-            $attributes['filenamename'] = $attributes['name'];
+            $attributes['filename'] = $attributes['name'];
             unset($attributes['name']);
         }
 
@@ -322,7 +373,7 @@ class File extends QueryableModel implements MediaUrlResolvable
                 'multipart' => $payload
             ])->getBody(), true);
 
-            return (new static())->newFromBuilder($response);
+            return static::find($response->id);
         }
 
         if (is_string($file) || (is_object($file) && method_exists($file, '__toString'))) {
@@ -336,7 +387,7 @@ class File extends QueryableModel implements MediaUrlResolvable
                 }
 
                 $response = $connection->post($baseUrl . '/link', $attributes, true);
-                return (new static())->newFromBuilder($response);
+                return static::find($response->id);
             } else {
                 $attributes['file'] = $file;
 
@@ -345,7 +396,7 @@ class File extends QueryableModel implements MediaUrlResolvable
                 }
 
                 $response = $connection->post($baseUrl . '/base64', $attributes, true);
-                return (new static())->newFromBuilder($response);
+                return static::find($response->id);
             }
         }
 
