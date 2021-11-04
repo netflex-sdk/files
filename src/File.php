@@ -3,7 +3,7 @@
 namespace Netflex\Files;
 
 use Carbon\Carbon;
-
+use Netflex\Query\Builder;
 use Netflex\Query\QueryableModel;
 
 use Netflex\Pages\Contracts\MediaUrlResolvable;
@@ -155,7 +155,7 @@ class File extends QueryableModel implements MediaUrlResolvable
 
     public function getResolutionAttribute()
     {
-        return $this->img_res ?? ($this->img_width . 'x' . $this->img_height);
+        return $this->img_width . 'x' . $this->img_height;
     }
 
 
@@ -288,26 +288,24 @@ class File extends QueryableModel implements MediaUrlResolvable
     }
 
     /**
-     * Undocumented function
-     *
-     * @param [type] $newName
-     * @param [type] $newFolder
+     * @param string|null $newName
+     * @param array $newAttributes
+     * @param int|null $newFolder
      * @return static
      */
-    public function copy($newName = null, $newFolder = null)
+    public function copy($newName = null, $newAttributes = [], $newFolder = null)
     {
-        $attributes = [
-            'link' => $this->url(),
-            'filename' => $newName ?? $this->name,
-            'folder_id' => $newFolder ?? $this->folder_id,
-        ];
+        $attributes = $newAttributes;
+        $attributes['folder_id'] = $newFolder ?? $this->folder_id;
+        $attributes['name'] = $newName ?? $this->name;
 
-        $folder = $attributes['folder_id'];
+        foreach ($this->attributes as $key => $value) {
+            if (!in_array($key, ['link', 'id', 'path']) && !in_array($key, array_keys($attributes))) {
+                $attributes[$key] = $value;
+            }
+        }
 
-        $response = $this->getConnection()
-            ->post('files/folder/' . $folder, $attributes);
-
-        return static::find($response->id);
+        return static::upload($this->url(), $attributes);
     }
 
     /**
@@ -336,6 +334,12 @@ class File extends QueryableModel implements MediaUrlResolvable
             $attributes['img_o_date'] = $attributes['img_o_date'] ?? $file->img_o_date;
             $attributes['img_desc'] = $attributes['img_desc'] ?? $file->img_desc;
             $file = $file->url();
+        }
+
+        foreach (array_keys($attributes) as $key) {
+            if (in_array($key, ['tags', 'related_entries', 'related_comments']) && is_array($attributes[$key])) {
+                $attributes[$key] = implode(',', $attributes[$key]);
+            }
         }
 
         $folder = $folder === null ? 0 : $folder;
@@ -371,7 +375,7 @@ class File extends QueryableModel implements MediaUrlResolvable
 
             $response = json_decode($client->post($baseUrl . '/file', [
                 'multipart' => $payload
-            ])->getBody(), true);
+            ])->getBody());
 
             return static::find($response->id);
         }
@@ -386,7 +390,7 @@ class File extends QueryableModel implements MediaUrlResolvable
                     $attributes['filename'] = pathinfo($file, PATHINFO_BASENAME);
                 }
 
-                $response = $connection->post($baseUrl . '/link', $attributes, true);
+                $response = $connection->post($baseUrl . '/link', $attributes);
                 return static::find($response->id);
             } else {
                 $attributes['file'] = $file;
@@ -395,11 +399,54 @@ class File extends QueryableModel implements MediaUrlResolvable
                     throw new InvalidArgumentException('Name is required when uploading a base64 encoded file');
                 }
 
-                $response = $connection->post($baseUrl . '/base64', $attributes, true);
+                $response = $connection->post($baseUrl . '/base64', $attributes);
                 return static::find($response->id);
             }
         }
 
         throw new InvalidArgumentException('Invalid file type');
+    }
+
+    /**
+     * @param Builder|string $query
+     */
+    public static function tags($query = '*')
+    {
+        $instance = new static;
+        $connection = $instance->getConnection();
+
+        if ($query instanceof Builder) {
+            $query = $query->getQuery(true);
+        }
+
+        $response = $connection->post('search/raw', [
+            'body' => [
+                'query' => [
+                    'query_string' => [
+                        'query' => $query
+                    ]
+                ],
+                'aggs' => [
+                    'keywords' => [
+                        'terms' => [
+                            'field' => 'tags',
+                            'size' => Builder::MAX_QUERY_SIZE
+                        ]
+                    ]
+                ]
+            ],
+            'index' => $instance->getRelation(),
+            'size' => 0
+        ]);
+
+        $tags = [];
+        foreach ($response->aggregations->keywords->buckets as $bucket) {
+            foreach (explode(',', $bucket->key) as $tag) {
+                $tags[$tag] = $tags[$tag] ?? 0;
+                $tags[$tag] += $bucket->doc_count;
+            }
+        }
+
+        return array_filter($tags);
     }
 }
