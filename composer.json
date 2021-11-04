@@ -1,5 +1,6 @@
 {
-  "description": "netflex/files",
+  "name": "netflex/files",
+  "description": "Netflex files library",
   "type": "library",
   "license": "MIT",
   "keywords": [],
