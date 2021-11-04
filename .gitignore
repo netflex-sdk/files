@@ -11,3 +11,9 @@ _ide_helper.php
 
 ### PHP Unit ###
 .phpunit.result.cache
+
+### Testing ###
+.env
+cache
+test.php
+fish.png
