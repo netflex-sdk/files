@@ -2,7 +2,11 @@
 
 namespace Netflex\Files;
 
+
+use Closure;
+
 use Carbon\Carbon;
+use Exception;
 use Netflex\Query\Builder;
 use Netflex\Query\QueryableModel;
 
@@ -10,6 +14,8 @@ use Netflex\Pages\Contracts\MediaUrlResolvable;
 use Netflex\Query\Exceptions\NotFoundException;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Http\File as BaseFile;
+
 use InvalidArgumentException;
 use Netflex\API\Client;
 
@@ -39,7 +45,7 @@ use Netflex\API\Client;
  * @property string|null $img_alt
  * @property Carbon $img_o_date
  * @property string $foldercode
- * @property-read string|null $extesion
+ * @property-read string|null $extension
  * @property-read string $resolution
  */
 class File extends QueryableModel implements MediaUrlResolvable
@@ -47,6 +53,21 @@ class File extends QueryableModel implements MediaUrlResolvable
     protected $relation = 'file';
 
     protected $resolvableField = 'id';
+
+    protected $fillable = [
+        'name',
+        'folder_id',
+        'description',
+        'tags',
+        'related_entries',
+        'related_customers',
+        'img_lat',
+        'img_lon',
+        'img_artist',
+        'img_desc',
+        'img_alt',
+        'img_o_date',
+    ];
 
     protected $casts = [
         'userid' => 'int',
@@ -309,7 +330,7 @@ class File extends QueryableModel implements MediaUrlResolvable
     }
 
     /**
-     * @param UploadedFile|File|string $file
+     * @param UploadedFile|BaseFile|File|string $file
      * @param array $attributes
      * @param int|null $folder
      * @return static
@@ -354,7 +375,7 @@ class File extends QueryableModel implements MediaUrlResolvable
             unset($attributes['name']);
         }
 
-        if ($file instanceof UploadedFile) {
+        if (($file instanceof UploadedFile) || ($file instanceof BaseFile)) {
             $name = $attributes['filename'] ?? $file->getClientOriginalName();
 
             $payload = [
@@ -408,7 +429,7 @@ class File extends QueryableModel implements MediaUrlResolvable
     }
 
     /**
-     * @param Builder|string $query
+     * @param Closure|Builder|string $query
      */
     public static function tags($query = '*')
     {
@@ -417,6 +438,12 @@ class File extends QueryableModel implements MediaUrlResolvable
 
         if ($query instanceof Builder) {
             $query = $query->getQuery(true);
+        }
+
+        if (is_callable($query)) {
+            $builder = new Builder();
+            $query($builder);
+            $query = $builder->getQuery(true);
         }
 
         $response = $connection->post('search/raw', [
