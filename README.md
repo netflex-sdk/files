@@ -85,3 +85,25 @@ use Netflex\Files\File;
 
 $file = File::find(10000)->copy('new-name.png');
 ```
+
+## Generating image url's
+
+The File class implements the `Netflex\Pages\Contracts\MediaUrlResolvable` contract. And so it can be used like any other File object from Netflex.
+
+```php
+<?php
+
+use Netflex\Files\File;
+
+$file = File::find(10000);
+$url = media_url($file, 'my-preset-name');
+// or
+$url = media_url($file, '200x200', MODE_FIT);
+```
+
+You can also pass this object to the corresponding Blade components
+
+```html
+<x-picture :src="$file" preset="my-preset-name" />
+<x-image :src="$file" preset="my-preset-name" />
+```
