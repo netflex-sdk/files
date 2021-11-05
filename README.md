@@ -65,7 +65,15 @@ The most performand is to use an uploaded file directly, as this will get stream
 // $request is either a Form Request or an instance of Illuminate\Http\Request
 $file = $request->file('uploaded-file');
 
-$uploadedFile = File::store($file); // Uploaded to folder '0'.
+$uploadedFile = File::upload($file); // Uploaded to folder '0'.
+
+// You can also upload an external file like this
+$uploadedFile = File::upload('https://example.com/test.jpg');
+
+// Or a base64 encoded file:
+$uploadedFile = File::upload('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==', [
+    'name' => 'test.png' // Name is required in this case, as a default name cannot be infered
+]);
 ```
 
 ## Duplicating a file
