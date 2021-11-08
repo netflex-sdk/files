@@ -343,27 +343,24 @@ class File extends QueryableModel implements MediaUrlResolvable
             $folder = $attributes['folder_id'];
         }
 
+        if (!isset($attributes['folder_id']) && $folder) {
+            $attributes['folder_id'] = $folder;
+        }
+
         if ($file instanceof File) {
-            $folder = $folder ?? $file->folder_id;
-            $attributes['tags'] = implode(',', $attributes['tags'] ?? $file->tags);
-            $attributes['description'] = $attributes['description'] ?? $file->description;
-            $attributes['title'] = $attributes['title'] ?? $file->title;
-            $attributes['size'] = $attributes['size'] ?? $file->size;
-            $attributes['img_width'] = $attributes['img_width'] ?? $file->img_width;
-            $attributes['img_height'] = $attributes['img_height'] ?? $file->img_height;
-            $attributes['img_artist'] = $attributes['img_artist'] ?? $file->img_artist;
-            $attributes['img_o_date'] = $attributes['img_o_date'] ?? $file->img_o_date;
-            $attributes['img_desc'] = $attributes['img_desc'] ?? $file->img_desc;
+            foreach ($instance->fillable as $fillable) {
+                $attributes['fillable'] = $attributes[$fillable] ?? $file->{$fillable} ?? null;
+            }
             $file = $file->url();
         }
 
         foreach (array_keys($attributes) as $key) {
-            if (in_array($key, ['tags', 'related_entries', 'related_comments']) && is_array($attributes[$key])) {
+            if (is_array($attributes[$key])) {
                 $attributes[$key] = implode(',', $attributes[$key]);
             }
         }
 
-        $folder = $folder === null ? 0 : $folder;
+        $folder = $attributes['folder_id'];
 
         /** @var Client */
         $connection = $instance->getConnection();
