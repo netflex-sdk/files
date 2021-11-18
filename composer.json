@@ -1,0 +1,19 @@
+{
+    "name": "netflex/files",
+    "description": "Netflex files library",
+    "type": "library",
+    "license": "MIT",
+    "config": {
+        "sort-packages": true
+    },
+    "require": {
+        "illuminate/support": "^8.0",
+        "netflex/pages": "^4.0",
+        "netflex/query-builder": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Netflex\\Files\\": ""
+        }
+    }
+}
