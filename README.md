@@ -1,4 +1,6 @@
-# Netflex files library
+# Netflex Files
+
+[READ ONLY] Subtree split of the Netflex Files component (see [netflex/framework](https://github.con/netflex-sdk/framework))
 
 This package simplifies working with the Netflex Files API.
 
