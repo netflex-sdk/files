@@ -8,13 +8,18 @@
     },
     "require": {
         "illuminate/support": "^8.0",
-        "netflex/pages": "^4.0.15",
-        "netflex/query-builder": "^4.0.15",
+        "netflex/pages": "^4.0.16",
+        "netflex/query-builder": "^4.0.16",
         "php": "^7.4|^8.0"
     },
     "autoload": {
         "psr-4": {
             "Netflex\\Files\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "4.1.x-dev"
         }
     }
 }
