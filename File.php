@@ -335,17 +335,17 @@ class File extends QueryableModel implements MediaUrlResolvable
      * @param int|null $folder
      * @return static
      */
-    public static function upload($file, $attributes = [], $folder = null)
+    public static function upload($file, $attributes = [], $folder = 10000)
     {
         $instance = new static;
 
-        if (isset($attributes['folder_id']) && $folder === null) {
-            $folder = $attributes['folder_id'];
+        if (is_int($attributes)) {
+            $folder = $attributes;
+            $attributes = [];
         }
 
-        if (!isset($attributes['folder_id']) && $folder) {
-            $attributes['folder_id'] = $folder;
-        }
+        $attributes['folder_id'] = $attributes['folder_id'] ?? $folder;
+        $folder = $attributes['folder_id'];
 
         if ($file instanceof File) {
             foreach ($instance->fillable as $fillable) {
@@ -378,17 +378,13 @@ class File extends QueryableModel implements MediaUrlResolvable
             $payload = [
                 [
                     'name'     => 'file',
-                    'contents' => fopen($file->getFilename(), 'r'),
+                    'contents' => fopen($file->getRealPath(), 'r'),
                     'filename' => $name,
                 ]
             ];
 
             foreach ($attributes as $key => $value) {
-                $payload[] =
-                    [
-                        'name'     => $key,
-                        'contents' => $value
-                    ];
+                $payload[] = ['name' => $key, 'contents' => $value];
             }
 
             $response = json_decode($client->post($baseUrl . '/file', [
