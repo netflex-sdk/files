@@ -8,8 +8,8 @@
     },
     "require": {
         "illuminate/support": "^8.0",
-        "netflex/pages": "^4.9",
-        "netflex/query-builder": "^4.9",
+        "netflex/pages": "^4.9.1",
+        "netflex/query-builder": "^4.9.1",
         "php": "^7.4|^8.0"
     },
     "autoload": {
@@ -19,7 +19,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "4.9.x-dev"
+            "dev-master": "4.10.x-dev"
         }
     }
 }
