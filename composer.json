@@ -8,8 +8,8 @@
     },
     "require": {
         "illuminate/support": "^8.0",
-        "netflex/pages": "^4.12.4",
-        "netflex/query-builder": "^4.12.4",
+        "netflex/pages": "^4.12.5",
+        "netflex/query-builder": "^4.12.5",
         "php": "^7.4|^8.0"
     },
     "autoload": {
