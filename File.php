@@ -245,7 +245,7 @@ class File extends QueryableModel implements MediaUrlResolvable
      * @param mixed $key
      * @return array|null
      */
-    protected function performRetrieveRequest(?int $relationId = null, $key)
+    protected function performRetrieveRequest(?int $relationId = null, mixed $key = null)
     {
         return $this->getConnection()->get('files/file/' . $key, true);
     }
@@ -287,7 +287,7 @@ class File extends QueryableModel implements MediaUrlResolvable
      * @param array $attributes
      * @return void
      */
-    protected function performUpdateRequest(?int $relationId = null, $key, $attributes = [])
+    protected function performUpdateRequest(?int $relationId = null, mixed $key = null, $attributes = [])
     {
         $this->getConnection()
             ->put('files/file/' . $key, $attributes);
@@ -300,7 +300,7 @@ class File extends QueryableModel implements MediaUrlResolvable
      * @param mixed $key
      * @return bool
      */
-    protected function performDeleteRequest(?int $relationId = null, $key)
+    protected function performDeleteRequest(?int $relationId = null, mixed $key = null)
     {
         $this->getConnection()
             ->delete('files/file/' . $key);
