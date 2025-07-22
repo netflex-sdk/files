@@ -7,6 +7,7 @@ use Closure;
 
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\App;
 use Netflex\Query\Builder;
 use Netflex\Query\QueryableModel;
 
@@ -187,8 +188,8 @@ class File extends QueryableModel implements MediaUrlResolvable
     }
 
     /**
-     * @param string|null $preset 
-     * @return string|null 
+     * @param string|null $preset
+     * @return string|null
      */
     public function url($preset = null)
     {
@@ -434,7 +435,7 @@ class File extends QueryableModel implements MediaUrlResolvable
         }
 
         if (is_callable($query)) {
-            $builder = new Builder();
+            $builder = App::make(Builder::class);
             $query($builder);
             $query = $builder->getQuery(true);
         }
