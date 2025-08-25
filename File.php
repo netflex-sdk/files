@@ -6,7 +6,6 @@ namespace Netflex\Files;
 use Closure;
 
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Support\Facades\App;
 use Netflex\Query\Builder;
 use Netflex\Query\QueryableModel;
