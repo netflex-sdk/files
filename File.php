@@ -6,7 +6,7 @@ namespace Netflex\Files;
 use Closure;
 
 use Carbon\Carbon;
-use Illuminate\Support\Facades\App;
+use Exception;
 use Netflex\Query\Builder;
 use Netflex\Query\QueryableModel;
 
@@ -187,8 +187,8 @@ class File extends QueryableModel implements MediaUrlResolvable
     }
 
     /**
-     * @param string|null $preset
-     * @return string|null
+     * @param string|null $preset 
+     * @return string|null 
      */
     public function url($preset = null)
     {
@@ -245,7 +245,7 @@ class File extends QueryableModel implements MediaUrlResolvable
      * @param mixed $key
      * @return array|null
      */
-    protected function performRetrieveRequest(?int $relationId = null, mixed $key = null)
+    protected function performRetrieveRequest(?int $relationId = null, $key)
     {
         return $this->getConnection()->get('files/file/' . $key, true);
     }
@@ -287,7 +287,7 @@ class File extends QueryableModel implements MediaUrlResolvable
      * @param array $attributes
      * @return void
      */
-    protected function performUpdateRequest(?int $relationId = null, mixed $key = null, $attributes = [])
+    protected function performUpdateRequest(?int $relationId = null, $key, $attributes = [])
     {
         $this->getConnection()
             ->put('files/file/' . $key, $attributes);
@@ -300,7 +300,7 @@ class File extends QueryableModel implements MediaUrlResolvable
      * @param mixed $key
      * @return bool
      */
-    protected function performDeleteRequest(?int $relationId = null, mixed $key = null)
+    protected function performDeleteRequest(?int $relationId = null, $key)
     {
         $this->getConnection()
             ->delete('files/file/' . $key);
@@ -434,7 +434,7 @@ class File extends QueryableModel implements MediaUrlResolvable
         }
 
         if (is_callable($query)) {
-            $builder = App::make(Builder::class);
+            $builder = new Builder();
             $query($builder);
             $query = $builder->getQuery(true);
         }
